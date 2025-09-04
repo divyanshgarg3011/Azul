@@ -1,0 +1,2 @@
+# Azul
+AI Campaing Generator
