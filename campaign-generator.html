@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azul AI Campaign Generator - Live Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">A</span>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900">Azul AI Campaign Generator</h1>
+                </div>
+                <div class="text-sm text-gray-500">Live Demo</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Input Section -->
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Generate Your Marketing Campaign</h2>
+            <p class="text-gray-600 mb-6">Enter any website URL to generate a complete marketing campaign with social media content, brand analysis, and performance predictions.</p>
+            
+            <div class="flex space-x-4">
+                <input 
+                    type="url" 
+                    id="websiteUrl" 
+                    placeholder="https://example.com" 
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                >
+                <button 
+                    id="generateBtn" 
+                    onclick="generateCampaign()" 
+                    class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium"
+                >
+                    Generate Campaign
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Generating Your Campaign</h3>
+            <p class="text-gray-600">Analyzing website and creating personalized marketing content...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden space-y-6">
+            <!-- Brand Analysis -->
+            <div class="bg-white rounded-lg shadow-sm border p-6 fade-in">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</span>
+                    Brand Analysis
+                </h3>
+                <div id="brandAnalysis" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Brand analysis content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Campaign Strategy -->
+            <div class="bg-white rounded-lg shadow-sm border p-6 fade-in">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</span>
+                    Campaign Strategy
+                </h3>
+                <div id="campaignStrategy">
+                    <!-- Campaign strategy content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Social Media Posts -->
+            <div class="bg-white rounded-lg shadow-sm border p-6 fade-in">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</span>
+                    Social Media Content
+                </h3>
+                <div id="socialMediaPosts" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Social media posts will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Performance Score -->
+            <div class="bg-white rounded-lg shadow-sm border p-6 fade-in">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="w-6 h-6 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-bold mr-3">4</span>
+                    Performance Prediction
+                </h3>
+                <div id="performanceScore">
+                    <!-- Performance score will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden bg-red-50 border border-red-200 rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Error</h3>
+                    <div class="mt-2 text-sm text-red-700" id="errorMessage">
+                        <!-- Error message will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function generateCampaign() {
+            const urlInput = document.getElementById('websiteUrl');
+            const generateBtn = document.getElementById('generateBtn');
+            const loadingState = document.getElementById('loadingState');
+            const resultsSection = document.getElementById('resultsSection');
+            const errorState = document.getElementById('errorState');
+
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a website URL');
+                return;
+            }
+
+            // Show loading state
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            loadingState.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            errorState.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/generate-campaign-basic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    throw new Error(data.error || 'Failed to generate campaign');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message);
+            } finally {
+                // Hide loading state
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Campaign';
+                loadingState.classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            
+            // Display brand analysis
+            displayBrandAnalysis(data.brand_brief);
+            
+            // Display campaign strategy
+            displayCampaignStrategy(data.campaign_strategy);
+            
+            // Display social media posts
+            displaySocialMediaPosts(data.campaign_strategy.social_media_posts);
+            
+            // Display performance score
+            displayPerformanceScore(data.performance_score);
+            
+            resultsSection.classList.remove('hidden');
+        }
+
+        function displayBrandAnalysis(brandBrief) {
+            const container = document.getElementById('brandAnalysis');
+            container.innerHTML = `
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Brand Name</span>
+                        <p class="text-lg font-semibold text-gray-900">${brandBrief.brand_name}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Industry</span>
+                        <p class="text-gray-900 capitalize">${brandBrief.industry}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Brand Tone</span>
+                        <p class="text-gray-900 capitalize">${brandBrief.brand_tone}</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Target Audience</span>
+                        <p class="text-gray-900">${brandBrief.target_audience}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">Value Propositions</span>
+                        <ul class="text-gray-900 list-disc list-inside space-y-1">
+                            ${brandBrief.value_propositions.map(prop => `<li>${prop}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayCampaignStrategy(strategy) {
+            const container = document.getElementById('campaignStrategy');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Campaign Objective</h4>
+                        <p class="text-gray-700">${strategy.campaign_objective}</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Target Platforms</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${strategy.target_platforms.map(platform => 
+                                `<span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">${platform}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h4 class="font-medium text-gray-900 mb-2">Content Themes</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${strategy.content_themes.map(theme => 
+                                `<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">${theme}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displaySocialMediaPosts(posts) {
+            const container = document.getElementById('socialMediaPosts');
+            const platforms = ['facebook', 'instagram', 'linkedin', 'tiktok'];
+            
+            container.innerHTML = platforms.map(platform => {
+                const post = posts[platform];
+                const platformColors = {
+                    facebook: 'bg-blue-500',
+                    instagram: 'bg-pink-500',
+                    linkedin: 'bg-blue-700',
+                    tiktok: 'bg-black'
+                };
+                
+                return `
+                    <div class="border rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="w-8 h-8 ${platformColors[platform]} rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">${platform[0].toUpperCase()}</span>
+                            </div>
+                            <h4 class="ml-3 font-medium text-gray-900 capitalize">${platform}</h4>
+                        </div>
+                        <div class="space-y-2">
+                            ${post.headline ? `<p class="font-medium text-gray-900">${post.headline}</p>` : ''}
+                            ${post.primary_text ? `<p class="text-gray-700">${post.primary_text}</p>` : ''}
+                            ${post.caption ? `<p class="text-gray-700">${post.caption}</p>` : ''}
+                            ${post.post_text ? `<p class="text-gray-700">${post.post_text}</p>` : ''}
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                ${post.hashtags.map(tag => 
+                                    `<span class="text-blue-600 text-sm">${tag}</span>`
+                                ).join(' ')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayPerformanceScore(score) {
+            const container = document.getElementById('performanceScore');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-blue-600 mb-2">${score.overall_score}</div>
+                            <div class="text-gray-500">Overall Score</div>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            ${Object.entries(score.breakdown).map(([key, value]) => `
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600 capitalize">${key.replace('_', ' ')}</span>
+                                    <span class="font-medium">${value}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Improvement Suggestions</h4>
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            ${score.improvement_suggestions.map(suggestion => 
+                                `<li class="flex items-start"><span class="text-green-500 mr-2">•</span>${suggestion}</li>`
+                            ).join('')}
+                        </ul>
+                        <div class="mt-4">
+                            <h4 class="font-medium text-gray-900 mb-2">Analysis</h4>
+                            <p class="text-sm text-gray-700">${score.reasoning}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            const errorState = document.getElementById('errorState');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorState.classList.remove('hidden');
+        }
+
+        // Allow Enter key to trigger generation
+        document.getElementById('websiteUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateCampaign();
+            }
+        });
+    </script>
+</body>
+</html>
+

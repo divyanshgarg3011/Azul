@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azul AI Campaign Generator - Full AI Power</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/production-styles.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        .ai-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-success {
+            background: #10b981;
+            color: white;
+        }
+        .status-processing {
+            background: #f59e0b;
+            color: white;
+        }
+        .status-error {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-white text-blue-600 rounded-lg p-2 mr-3">
+                        <span class="text-xl font-bold">A</span>
+                    </div>
+                    <h1 class="text-2xl font-bold">Azul AI Campaign Generator</h1>
+                    <span class="ai-badge">AI POWERED</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/video-showcase.html" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-colors text-sm">
+                        🎬 View Videos
+                    </a>
+                    <div class="text-sm opacity-90">
+                        Full AI Integration • Video Generation • Qwen Analysis
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Input Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Generate Your AI-Powered Marketing Campaign</h2>
+            <p class="text-gray-600 mb-6">
+                Enter any website URL to generate a complete marketing campaign with AI brand analysis, 
+                professional video ads, and social media content across all platforms.
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-4">
+                <input 
+                    type="url" 
+                    id="urlInput" 
+                    placeholder="https://example.com" 
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                <button 
+                    id="generateBtn" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center min-w-[200px]"
+                >
+                    <span id="btnText">Generate AI Campaign</span>
+                    <div id="btnSpinner" class="loading-spinner ml-2 hidden"></div>
+                </button>
+            </div>
+
+            <!-- AI Features -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="flex items-center text-sm text-gray-600">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Qwen AI Analysis
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Video Generation
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Multi-Platform Content
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Performance Scoring
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="bg-white rounded-xl shadow-lg p-8 mb-8 hidden">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto mb-4" style="width: 48px; height: 48px; border-width: 4px;"></div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">AI is Working Its Magic</h3>
+                <p id="loadingText" class="text-gray-600">Analyzing website and generating campaign...</p>
+                <div class="mt-4 bg-gray-200 rounded-full h-2">
+                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <!-- Video Ad Section -->
+            <div id="videoSection" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    🎬 AI-Generated Video Ad
+                    <span class="ai-badge ml-2">NEW</span>
+                    <span id="videoStatus" class="status-badge status-processing ml-2 hidden">Generating...</span>
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <!-- Video Player Container -->
+                        <div id="videoContainer" class="video-container bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                            <!-- Loading State -->
+                            <div id="videoLoading" class="text-center text-gray-500">
+                                <div class="text-4xl mb-2">🎬</div>
+                                <div>Video will appear here</div>
+                            </div>
+                            
+                            <!-- Processing State -->
+                            <div id="videoProcessing" class="text-center text-blue-600 hidden">
+                                <div class="loading-spinner mx-auto mb-3"></div>
+                                <div class="font-medium">AI is creating your video ad...</div>
+                                <div class="text-sm text-gray-600 mt-1">This may take 30-60 seconds</div>
+                            </div>
+                            
+                            <!-- Video Player -->
+                            <video id="generatedVideo" class="w-full h-full object-cover rounded-lg hidden" controls>
+                                <source id="videoSource" src="" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            
+                            <!-- Video Overlay Info -->
+                            <div id="videoOverlay" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 text-white hidden">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-medium" id="videoTitle">Professional Marketing Video</div>
+                                        <div class="text-sm opacity-90" id="videoOverlayDuration">8 seconds • 1280x720 HD</div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button id="downloadVideoOverlayBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                                            Download
+                                        </button>
+                                        <button id="shareVideoOverlayBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded text-sm">
+                                            Share
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Video Actions -->
+                        <div class="mt-4 flex justify-center space-x-4">
+                            <button id="downloadVideoBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                Download Video
+                            </button>
+                            <button id="shareVideoBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                Share Video
+                            </button>
+                            <button id="viewInShowcaseBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                🎬 View in Gallery
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">Video Details</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Duration:</span>
+                                <span id="videoDuration" class="font-medium">5-10 seconds</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Resolution:</span>
+                                <span class="font-medium">1280x720 HD</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Style:</span>
+                                <span id="videoStyle" class="font-medium">Professional</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Format:</span>
+                                <span class="font-medium">MP4</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Quality Score:</span>
+                                <span class="font-medium text-green-600" id="videoQualityScore">-</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                            <h5 class="font-semibold text-blue-800 mb-2">AI Video Prompt</h5>
+                            <p id="videoMessage" class="text-blue-700 text-sm">AI-generated marketing message</p>
+                        </div>
+                        
+                        <!-- Video Analytics -->
+                        <div id="videoAnalytics" class="mt-4 p-4 bg-green-50 rounded-lg hidden">
+                            <h5 class="font-semibold text-green-800 mb-2">Video Performance</h5>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-green-700 text-sm">Engagement Score:</span>
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-green-200 rounded-full h-2 mr-2">
+                                            <div id="engagementBar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                        <span class="text-green-800 font-medium text-sm" id="engagementScore">-</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-green-700 text-sm">Brand Alignment:</span>
+                                    <div class="flex items-center">
+                                        <div class="w-16 bg-green-200 rounded-full h-2 mr-2">
+                                            <div id="brandBar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                        <span class="text-green-800 font-medium text-sm" id="brandScore">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brand Analysis -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    🎯 AI Brand Analysis
+                    <span class="ai-badge ml-2">QWEN</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">Brand Overview</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-gray-600">Brand Name:</span>
+                                <span id="brandName" class="font-medium ml-2">Loading...</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Industry:</span>
+                                <span id="brandIndustry" class="font-medium ml-2">Loading...</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Brand Tone:</span>
+                                <span id="brandTone" class="font-medium ml-2">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">Target Audience</h4>
+                        <p id="targetAudience" class="text-gray-700">Loading...</p>
+                        
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3 mt-6">Value Propositions</h4>
+                        <ul id="valueProps" class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>Loading...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Strategy -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">📈 AI Campaign Strategy</h3>
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Campaign Objective</h4>
+                    <p id="campaignObjective" class="text-gray-700">Loading...</p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="text-blue-600 font-bold text-lg">Facebook</div>
+                        <div class="text-blue-500 text-sm">Professional</div>
+                    </div>
+                    <div class="text-center p-4 bg-pink-50 rounded-lg">
+                        <div class="text-pink-600 font-bold text-lg">Instagram</div>
+                        <div class="text-pink-500 text-sm">Visual</div>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="text-blue-700 font-bold text-lg">LinkedIn</div>
+                        <div class="text-blue-600 text-sm">Business</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-gray-700 font-bold text-lg">TikTok</div>
+                        <div class="text-gray-600 text-sm">Trending</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Content Themes</h4>
+                    <div id="contentThemes" class="flex flex-wrap gap-2">
+                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Content -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">📱 AI Social Media Content</h3>
+                
+                <!-- Platform Tabs -->
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button class="platform-tab active px-6 py-3 font-medium text-blue-600 border-b-2 border-blue-600" data-platform="facebook">
+                        Facebook
+                    </button>
+                    <button class="platform-tab px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-platform="instagram">
+                        Instagram
+                    </button>
+                    <button class="platform-tab px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-platform="linkedin">
+                        LinkedIn
+                    </button>
+                    <button class="platform-tab px-6 py-3 font-medium text-gray-500 hover:text-gray-700" data-platform="tiktok">
+                        TikTok
+                    </button>
+                </div>
+
+                <!-- Platform Content -->
+                <div id="platformContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Performance Prediction -->
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">🎯 AI Performance Prediction</h3>
+                
+                <div class="text-center mb-8">
+                    <div id="overallScore" class="text-6xl font-bold text-blue-600 mb-2">85</div>
+                    <div class="text-gray-600 text-lg">Overall Campaign Score</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Performance Breakdown</h4>
+                        <div id="performanceBreakdown" class="space-y-3">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">AI Improvement Suggestions</h4>
+                        <ul id="improvementSuggestions" class="space-y-2 text-gray-700">
+                            <!-- Will be populated by JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentCampaignData = null;
+
+        // DOM Elements
+        const urlInput = document.getElementById('urlInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const loadingState = document.getElementById('loadingState');
+        const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const resultsSection = document.getElementById('resultsSection');
+
+        // Generate Campaign
+        generateBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            // Show loading state
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/generate-campaign-ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentCampaignData = data;
+                
+                // Hide loading and show results
+                hideLoading();
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideLoading();
+                alert('Failed to generate campaign. Please try again.');
+            }
+        });
+
+        function showLoading() {
+            generateBtn.disabled = true;
+            btnText.textContent = 'Generating...';
+            btnSpinner.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+                
+                // Update loading text
+                if (progress < 30) {
+                    loadingText.textContent = 'Scraping website content...';
+                } else if (progress < 60) {
+                    loadingText.textContent = 'AI analyzing brand with Qwen...';
+                } else if (progress < 85) {
+                    loadingText.textContent = 'Generating video ad...';
+                } else {
+                    loadingText.textContent = 'Finalizing campaign strategy...';
+                }
+            }, 1000);
+            
+            // Store interval for cleanup
+            window.progressInterval = progressInterval;
+        }
+
+        function hideLoading() {
+            generateBtn.disabled = false;
+            btnText.textContent = 'Generate AI Campaign';
+            btnSpinner.classList.add('hidden');
+            loadingState.classList.add('hidden');
+            progressBar.style.width = '100%';
+            
+            if (window.progressInterval) {
+                clearInterval(window.progressInterval);
+            }
+        }
+
+        function displayResults(data) {
+            resultsSection.classList.remove('hidden');
+            
+            // Display video data
+            if (data.video_data && data.video_data.success) {
+                displayVideoAd(data.video_data);
+            }
+            
+            // Display brand analysis
+            displayBrandAnalysis(data.brand_brief);
+            
+            // Display campaign strategy
+            displayCampaignStrategy(data.campaign_strategy);
+            
+            // Display social media content
+            displaySocialMediaContent(data.campaign_strategy.social_media_posts);
+            
+            // Display performance score
+            displayPerformanceScore(data.performance_score);
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayVideoAd(videoData) {
+            const videoContainer = document.getElementById('videoContainer');
+            const videoLoading = document.getElementById('videoLoading');
+            const videoProcessing = document.getElementById('videoProcessing');
+            const generatedVideo = document.getElementById('generatedVideo');
+            const videoSource = document.getElementById('videoSource');
+            const videoOverlay = document.getElementById('videoOverlay');
+            const videoAnalytics = document.getElementById('videoAnalytics');
+            
+            // Show processing state first
+            videoLoading.classList.add('hidden');
+            videoProcessing.classList.remove('hidden');
+            
+            // Update video status
+            const videoStatus = document.getElementById('videoStatus');
+            videoStatus.classList.remove('hidden');
+            videoStatus.textContent = 'Generating...';
+            
+            if (videoData.video_url) {
+                // Hide processing, show video
+                setTimeout(() => {
+                    videoProcessing.classList.add('hidden');
+                    generatedVideo.classList.remove('hidden');
+                    videoOverlay.classList.remove('hidden');
+                    videoAnalytics.classList.remove('hidden');
+                    
+                    // Set video source
+                    videoSource.src = videoData.video_url;
+                    generatedVideo.load();
+                    
+                    // Update video status
+                    videoStatus.textContent = 'Generated';
+                    videoStatus.classList.remove('status-processing');
+                    videoStatus.classList.add('status-success');
+                    
+                    // Update video details
+                    document.getElementById('videoTitle').textContent = videoData.title || 'Professional Marketing Video';
+                    document.getElementById('videoOverlayDuration').textContent = `${videoData.duration || '8 seconds'} • 1280x720 HD`;
+                    document.getElementById('videoDuration').textContent = videoData.duration || '8 seconds';
+                    document.getElementById('videoMessage').textContent = videoData.prompt || 'AI-generated marketing message';
+                    document.getElementById('videoQualityScore').textContent = `${videoData.quality_score || 92}%`;
+                    
+                    // Update analytics
+                    if (videoData.engagement_score) {
+                        document.getElementById('engagementScore').textContent = `${videoData.engagement_score}%`;
+                        document.getElementById('engagementBar').style.width = `${videoData.engagement_score}%`;
+                    }
+                    if (videoData.brand_score) {
+                        document.getElementById('brandScore').textContent = `${videoData.brand_score}%`;
+                        document.getElementById('brandBar').style.width = `${videoData.brand_score}%`;
+                    }
+                    
+                    // Set up download handlers
+                    const downloadBtns = [
+                        document.getElementById('downloadVideoBtn'),
+                        document.getElementById('downloadVideoOverlayBtn')
+                    ];
+                    downloadBtns.forEach(btn => {
+                        if (btn) {
+                            btn.onclick = () => window.open(videoData.video_url, '_blank');
+                        }
+                    });
+                    
+                    // Set up share handlers
+                    const shareBtns = [
+                        document.getElementById('shareVideoBtn'),
+                        document.getElementById('shareVideoOverlayBtn')
+                    ];
+                    shareBtns.forEach(btn => {
+                        if (btn) {
+                            btn.onclick = () => shareVideo(videoData.video_url);
+                        }
+                    });
+                    
+                    // Set up showcase button
+                    const showcaseBtn = document.getElementById('viewInShowcaseBtn');
+                    if (showcaseBtn) {
+                        showcaseBtn.onclick = () => {
+                            // Store video data for showcase
+                            localStorage.setItem('latestGeneratedVideo', JSON.stringify({
+                                id: Date.now(),
+                                url: videoData.video_url,
+                                title: videoData.title || 'Campaign Video',
+                                brand: videoData.brand_name || 'Unknown Brand',
+                                website: document.getElementById('websiteUrl').value,
+                                status: 'success',
+                                duration: videoData.duration || '8 seconds',
+                                resolution: '1280x720',
+                                created: new Date().toISOString(),
+                                prompt: videoData.prompt || '',
+                                qualityScore: videoData.quality_score || 92,
+                                engagementScore: videoData.engagement_score || 88,
+                                brandScore: videoData.brand_score || 95
+                            }));
+                            window.location.href = '/video-showcase.html';
+                        };
+                    }
+                }, 1000);
+            } else {
+                // Show error state
+                setTimeout(() => {
+                    videoProcessing.classList.add('hidden');
+                    videoLoading.classList.remove('hidden');
+                    videoLoading.innerHTML = `
+                        <div class="text-center text-red-500">
+                            <div class="text-4xl mb-2">⚠️</div>
+                            <div>Video generation failed</div>
+                            <div class="text-sm text-gray-600 mt-1">Please try again</div>
+                        </div>
+                    `;
+                    videoStatus.textContent = 'Failed';
+                    videoStatus.classList.remove('status-processing');
+                    videoStatus.classList.add('status-error');
+                }, 1000);
+            }
+        }
+        
+        function shareVideo(videoUrl) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'AI Generated Video Ad',
+                    text: 'Check out this AI-generated video ad!',
+                    url: videoUrl
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(videoUrl).then(() => {
+                    alert('Video URL copied to clipboard!');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = videoUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Video URL copied to clipboard!');
+                });
+            }
+        }
+
+        function displayBrandAnalysis(brandBrief) {
+            document.getElementById('brandName').textContent = brandBrief.brand_name || 'Unknown';
+            document.getElementById('brandIndustry').textContent = brandBrief.industry || 'Business';
+            document.getElementById('brandTone').textContent = brandBrief.brand_tone || 'Professional';
+            document.getElementById('targetAudience').textContent = brandBrief.target_audience || 'General audience';
+            
+            const valueProps = document.getElementById('valueProps');
+            if (brandBrief.value_propositions && Array.isArray(brandBrief.value_propositions)) {
+                valueProps.innerHTML = brandBrief.value_propositions
+                    .map(prop => `<li>${prop}</li>`)
+                    .join('');
+            }
+        }
+
+        function displayCampaignStrategy(strategy) {
+            document.getElementById('campaignObjective').textContent = strategy.campaign_objective || 'Increase brand awareness';
+            
+            const contentThemes = document.getElementById('contentThemes');
+            if (strategy.content_themes && Array.isArray(strategy.content_themes)) {
+                contentThemes.innerHTML = strategy.content_themes
+                    .map(theme => `<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">${theme}</span>`)
+                    .join('');
+            }
+        }
+
+        function displaySocialMediaContent(socialPosts) {
+            const platformContent = document.getElementById('platformContent');
+            
+            // Set up platform tabs
+            document.querySelectorAll('.platform-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.platform-tab').forEach(t => {
+                        t.classList.remove('active', 'text-blue-600', 'border-blue-600');
+                        t.classList.add('text-gray-500');
+                    });
+                    
+                    // Add active class to clicked tab
+                    tab.classList.add('active', 'text-blue-600', 'border-blue-600');
+                    tab.classList.remove('text-gray-500');
+                    
+                    // Show content for selected platform
+                    showPlatformContent(tab.dataset.platform, socialPosts);
+                });
+            });
+            
+            // Show Facebook content by default
+            showPlatformContent('facebook', socialPosts);
+        }
+
+        function showPlatformContent(platform, socialPosts) {
+            const platformContent = document.getElementById('platformContent');
+            const post = socialPosts[platform];
+            
+            if (!post) return;
+            
+            let content = '';
+            
+            if (platform === 'facebook') {
+                content = `
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Headline</h5>
+                            <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">${post.headline || post.primary_text}</p>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Primary Text</h5>
+                            <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">${post.primary_text}</p>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Hashtags</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${post.hashtags.map(tag => `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (platform === 'instagram') {
+                content = `
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Caption</h5>
+                            <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">${post.caption}</p>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Hashtags</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${post.hashtags.map(tag => `<span class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-sm">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (platform === 'linkedin') {
+                content = `
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Headline</h5>
+                            <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">${post.headline}</p>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Post Text</h5>
+                            <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">${post.post_text}</p>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Hashtags</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${post.hashtags.map(tag => `<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (platform === 'tiktok') {
+                content = `
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Caption</h5>
+                            <p class="text-gray-700 bg-gray-50 p-3 rounded-lg">${post.caption}</p>
+                        </div>
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2">Hashtags</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${post.hashtags.map(tag => `<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            platformContent.innerHTML = content;
+        }
+
+        function displayPerformanceScore(scoreData) {
+            document.getElementById('overallScore').textContent = scoreData.overall_score || 85;
+            
+            const breakdown = document.getElementById('performanceBreakdown');
+            if (scoreData.breakdown) {
+                breakdown.innerHTML = Object.entries(scoreData.breakdown)
+                    .map(([key, value]) => `
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600 capitalize">${key.replace('_', ' ')}</span>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${value}%"></div>
+                                </div>
+                                <span class="font-medium text-gray-800">${value}</span>
+                            </div>
+                        </div>
+                    `).join('');
+            }
+            
+            const suggestions = document.getElementById('improvementSuggestions');
+            if (scoreData.improvement_suggestions && Array.isArray(scoreData.improvement_suggestions)) {
+                suggestions.innerHTML = scoreData.improvement_suggestions
+                    .map(suggestion => `<li class="flex items-start"><span class="text-green-500 mr-2">•</span>${suggestion}</li>`)
+                    .join('');
+            }
+        }
+
+        // Allow Enter key to trigger generation
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateBtn.click();
+            }
+        });
+    </script>
+    
+    <!-- Production Enhancements -->
+    <script src="/static/js/production-enhancements.js"></script>
+</body>
+</html>
+

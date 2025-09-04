@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Showcase - Azul AI Campaign Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+        .video-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .ai-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-success {
+            background: #10b981;
+            color: white;
+        }
+        .status-processing {
+            background: #f59e0b;
+            color: white;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            z-index: 50;
+        }
+        .floating-action:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-white text-blue-600 rounded-lg p-2 mr-3">
+                        <span class="text-xl font-bold">A</span>
+                    </div>
+                    <h1 class="text-2xl font-bold">Video Showcase</h1>
+                    <span class="ai-badge ml-3">AI GENERATED</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/ai-campaign-generator.html" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-colors">
+                        ← Back to Generator
+                    </a>
+                    <div class="text-sm opacity-90">
+                        Professional Video Ads • AI Powered
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg">
+                <div class="text-3xl font-bold text-blue-600" id="totalVideos">0</div>
+                <div class="text-gray-600 mt-1">Total Videos</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg">
+                <div class="text-3xl font-bold text-green-600" id="successfulVideos">0</div>
+                <div class="text-gray-600 mt-1">Successful</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg">
+                <div class="text-3xl font-bold text-orange-600" id="processingVideos">0</div>
+                <div class="text-gray-600 mt-1">Processing</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg">
+                <div class="text-3xl font-bold text-purple-600">HD</div>
+                <div class="text-gray-600 mt-1">Quality</div>
+            </div>
+        </div>
+
+        <!-- Video Gallery -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-bold text-gray-800">Generated Video Ads</h2>
+                <button id="refreshBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Video Grid -->
+            <div id="videoGrid" class="video-grid">
+                <!-- Videos will be populated by JavaScript -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-16 hidden">
+                <div class="text-gray-400 mb-4">
+                    <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No Videos Generated Yet</h3>
+                <p class="text-gray-500 mb-6">Start generating campaigns to see your AI-created video ads here!</p>
+                <a href="/ai-campaign-generator.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Generate Your First Video
+                </a>
+            </div>
+        </div>
+
+        <!-- Featured Video Section -->
+        <div id="featuredSection" class="bg-white rounded-xl shadow-lg p-8 mb-8 hidden">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                🏆 Featured Video Ad
+                <span class="ai-badge ml-3">BEST QUALITY</span>
+            </h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                    <div id="featuredVideoContainer" class="video-container bg-gray-100 rounded-lg">
+                        <!-- Featured video will be inserted here -->
+                    </div>
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button id="downloadFeaturedBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            Download Video
+                        </button>
+                        <button id="shareFeaturedBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            Share Video
+                        </button>
+                        <button id="viewCampaignBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            View Full Campaign
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Video Analytics</h4>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Quality Score:</span>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div id="qualityScore" class="bg-green-600 h-2 rounded-full" style="width: 92%"></div>
+                                </div>
+                                <span class="font-medium text-gray-800">92%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Engagement Potential:</span>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div id="engagementScore" class="bg-blue-600 h-2 rounded-full" style="width: 88%"></div>
+                                </div>
+                                <span class="font-medium text-gray-800">88%</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Brand Alignment:</span>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div id="brandScore" class="bg-purple-600 h-2 rounded-full" style="width: 95%"></div>
+                                </div>
+                                <span class="font-medium text-gray-800">95%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <h5 class="font-semibold text-blue-800 mb-2">AI Insights</h5>
+                        <ul id="aiInsights" class="text-blue-700 text-sm space-y-1">
+                            <li>• Professional cinematography detected</li>
+                            <li>• Strong brand message clarity</li>
+                            <li>• Optimal duration for social media</li>
+                            <li>• High visual appeal score</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <a href="/ai-campaign-generator.html" class="floating-action">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Generate New Video
+        </div>
+    </a>
+
+    <script>
+        // Sample video data - in real implementation, this would come from the backend
+        let videoDatabase = [
+            {
+                id: 1,
+                url: "https://dashscope-result-sgp.oss-ap-southeast-1.aliyuncs.com/1d/bf/20250904/5259de3d/e3da172a-4754-4820-b63b-41a767ff02f1.mp4",
+                title: "GitHub Campaign Video",
+                brand: "GitHub",
+                website: "https://github.com",
+                status: "success",
+                duration: "8 seconds",
+                resolution: "1280x720",
+                created: "2025-09-04T03:08:32Z",
+                prompt: "A professional marketing video for GitHub · Build and ship software on a single, collaborative platform · GitHub, a technology company. Show modern office environment with people working, clean and professional atmosphere, high quality cinematography",
+                qualityScore: 92,
+                engagementScore: 88,
+                brandScore: 95,
+                thumbnail: null
+            }
+        ];
+
+        // DOM Elements
+        const videoGrid = document.getElementById('videoGrid');
+        const emptyState = document.getElementById('emptyState');
+        const featuredSection = document.getElementById('featuredSection');
+        const totalVideosEl = document.getElementById('totalVideos');
+        const successfulVideosEl = document.getElementById('successfulVideos');
+        const processingVideosEl = document.getElementById('processingVideos');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        // Initialize the page
+        function init() {
+            loadVideos();
+            updateStats();
+            setupEventListeners();
+            
+            // Check for new videos from localStorage (if coming from generator)
+            checkForNewVideos();
+        }
+
+        function loadVideos() {
+            if (videoDatabase.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            hideEmptyState();
+            renderVideoGrid();
+            showFeaturedVideo();
+        }
+
+        function renderVideoGrid() {
+            videoGrid.innerHTML = '';
+            
+            videoDatabase.forEach(video => {
+                const videoCard = createVideoCard(video);
+                videoGrid.appendChild(videoCard);
+            });
+        }
+
+        function createVideoCard(video) {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            
+            const statusBadgeClass = video.status === 'success' ? 'status-success' : 'status-processing';
+            const statusText = video.status === 'success' ? 'Generated' : 'Processing';
+            
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">${video.title}</h3>
+                    <span class="status-badge ${statusBadgeClass}">${statusText}</span>
+                </div>
+                
+                <div class="video-container mb-4">
+                    ${video.status === 'success' ? 
+                        `<video controls class="w-full h-full object-cover">
+                            <source src="${video.url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>` :
+                        `<div class="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                            <div class="text-center">
+                                <div class="loading-spinner mx-auto mb-2"></div>
+                                <div class="text-gray-600 text-sm">Generating video...</div>
+                            </div>
+                        </div>`
+                    }
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Brand:</span>
+                        <span class="font-medium">${video.brand}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Duration:</span>
+                        <span class="font-medium">${video.duration}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Resolution:</span>
+                        <span class="font-medium">${video.resolution}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Created:</span>
+                        <span class="font-medium">${formatDate(video.created)}</span>
+                    </div>
+                </div>
+                
+                ${video.status === 'success' ? 
+                    `<div class="flex space-x-2">
+                        <button onclick="downloadVideo('${video.url}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-sm font-medium">
+                            Download
+                        </button>
+                        <button onclick="shareVideo('${video.url}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-sm font-medium">
+                            Share
+                        </button>
+                        <button onclick="viewDetails(${video.id})" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-3 rounded text-sm font-medium">
+                            Details
+                        </button>
+                    </div>` :
+                    `<div class="text-center">
+                        <div class="text-gray-500 text-sm">Video will be ready in a few moments...</div>
+                    </div>`
+                }
+            `;
+            
+            return card;
+        }
+
+        function showFeaturedVideo() {
+            const featuredVideo = videoDatabase.find(v => v.status === 'success');
+            if (!featuredVideo) return;
+            
+            featuredSection.classList.remove('hidden');
+            
+            const container = document.getElementById('featuredVideoContainer');
+            container.innerHTML = `
+                <video controls class="w-full h-full object-cover">
+                    <source src="${featuredVideo.url}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+            
+            // Update featured video buttons
+            document.getElementById('downloadFeaturedBtn').onclick = () => downloadVideo(featuredVideo.url);
+            document.getElementById('shareFeaturedBtn').onclick = () => shareVideo(featuredVideo.url);
+            document.getElementById('viewCampaignBtn').onclick = () => viewFullCampaign(featuredVideo.website);
+        }
+
+        function updateStats() {
+            const total = videoDatabase.length;
+            const successful = videoDatabase.filter(v => v.status === 'success').length;
+            const processing = videoDatabase.filter(v => v.status === 'processing').length;
+            
+            totalVideosEl.textContent = total;
+            successfulVideosEl.textContent = successful;
+            processingVideosEl.textContent = processing;
+        }
+
+        function showEmptyState() {
+            videoGrid.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            featuredSection.classList.add('hidden');
+        }
+
+        function hideEmptyState() {
+            videoGrid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+        }
+
+        function setupEventListeners() {
+            refreshBtn.addEventListener('click', () => {
+                // In real implementation, this would fetch from backend
+                loadVideos();
+                updateStats();
+            });
+        }
+
+        function checkForNewVideos() {
+            // Check if there's a new video from the campaign generator
+            const newVideoData = localStorage.getItem('latestGeneratedVideo');
+            if (newVideoData) {
+                try {
+                    const videoData = JSON.parse(newVideoData);
+                    // Add to database if not already exists
+                    if (!videoDatabase.find(v => v.url === videoData.url)) {
+                        videoDatabase.unshift(videoData);
+                        localStorage.removeItem('latestGeneratedVideo');
+                        loadVideos();
+                        updateStats();
+                    }
+                } catch (e) {
+                    console.error('Error parsing video data:', e);
+                }
+            }
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function downloadVideo(url) {
+            window.open(url, '_blank');
+        }
+
+        function shareVideo(url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'AI Generated Video Ad',
+                    text: 'Check out this AI-generated video ad!',
+                    url: url
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Video URL copied to clipboard!');
+                });
+            }
+        }
+
+        function viewDetails(videoId) {
+            const video = videoDatabase.find(v => v.id === videoId);
+            if (video) {
+                alert(`Video Details:\n\nTitle: ${video.title}\nBrand: ${video.brand}\nPrompt: ${video.prompt}\nQuality Score: ${video.qualityScore}%`);
+            }
+        }
+
+        function viewFullCampaign(website) {
+            // Redirect to campaign generator with the website pre-filled
+            window.location.href = `/ai-campaign-generator.html?url=${encodeURIComponent(website)}`;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Auto-refresh every 30 seconds to check for new videos
+        setInterval(() => {
+            checkForNewVideos();
+        }, 30000);
+    </script>
+</body>
+</html>
+
